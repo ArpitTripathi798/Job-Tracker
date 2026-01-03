@@ -6,29 +6,48 @@ import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import jobRoutes from "./routes/job.routes.js";
 
-dotenv.config(); // 🔥 MUST be at top
+dotenv.config(); // ✅ MUST be at top
 
 const app = express();
 
-// SIMPLE CORS (JWT via headers, no cookies)
+/* ===================== CORS CONFIG ===================== */
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://job-tracker-two-ivory.vercel.app",
+  "https://job-tracker-frontend-green.vercel.app",
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+/* ======================================================= */
 
 app.use(express.json());
 
+/* ===================== ROUTES ===================== */
 app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
+/* ================================================ */
 
+/* DB  */
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log(err));
+  .catch((err) => console.error("MongoDB error:", err));
 
-app.listen(process.env.PORT || 5000, () =>
-  console.log(`Server running on ${process.env.PORT || 5000}`)
-);
+
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
