@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "https://job-tracker-backend.onrender.com/api",
+  baseURL:"https://job-tracker-backend-kmux.onrender.com/api",
+
 
 });
 
