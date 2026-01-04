@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "../utils/axios";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -11,6 +11,13 @@ export default function Login() {
   });
 
   const [error, setError] = useState("");
+
+  /* ================= CLEAR OLD TOKEN ================= */
+  useEffect(() => {
+    // 🔥 very important: prevent fake/old login
+    localStorage.removeItem("token");
+  }, []);
+  /* =================================================== */
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -29,17 +36,20 @@ export default function Login() {
         throw new Error("Token not received");
       }
 
+      // ✅ Save fresh token
       localStorage.setItem("token", res.data.token);
 
-      console.log(
-        "TOKEN SAVED:",
-        localStorage.getItem("token")
-      );
+      console.log("TOKEN SAVED:", localStorage.getItem("token"));
 
+      // ✅ Redirect only after successful login
       navigate("/dashboard");
     } catch (err) {
       console.error("LOGIN ERROR:", err);
-      setError("Invalid email or password");
+
+      // 🔥 Show real backend error message
+      setError(
+        err.response?.data?.message || "Login failed"
+      );
     }
   };
 
